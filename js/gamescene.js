@@ -19,8 +19,8 @@ var GameScene = new Phaser.Class({
 
     preload: function ()
     {
-		this.load.image('bg', '../img/bg.jpg');
-		this.load.image('girl', '../img/girl.png');
+		this.load.image('bg', 'https://github.com/AzureJames/Phaser3-example-game/blob/master/img/bg.jpg');
+		this.load.image('girl', 'https://github.com/AzureJames/Phaser3-example-game/blob/master/img/girl.png');
     },
 
     create: function ()
