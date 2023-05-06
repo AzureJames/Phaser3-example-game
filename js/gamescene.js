@@ -19,31 +19,193 @@ var GameScene = new Phaser.Class({
 
     preload: function ()
     {
-
+		this.load.image('bg', '../img/bg.jpg');
+		this.load.image('girl', '../img/girl.png');
     },
 
     create: function ()
     {
-		// add player sprite
-		this.dude = this.physics.add.image(400, 200, 'sprites', 'dude');
-		//this.dude = this.add.sprite(400, 200, 'sprites', 'dude');
+		//turn manager
+		this.turnmanager = "playermovement";
 
-		this.dude.setCollideWorldBounds(true);
+		//this.bg = this.add.image(25,25,'bg');
+		var image = this.add.tileSprite(25,25,2000,2000,'bg');
+		// add player sprite
+
+		this.dude = this.physics.add.sprite(500, 200, 'girl');
+		this.dude.setScale(.7);
+		this.dude.hp = 30;
+		//this.load.image('water', './assets/underwater.jpg');
+		
+		//player move
+		this.input.on('pointerdown', (pointer) =>
+		{
+			if(this.turnmanager == "playermovement"){
+				if (pointer.worldY >500) {
+					return;
+				}
+				if (pointer.worldX > this.dude.x -80 && pointer.worldX < this.dude.x +80){
+					if (pointer.worldY > this.dude.y -80 && pointer.worldY < this.dude.y +80){
+						this.dude.setX(Math.round(pointer.worldX / 50) * 50);
+						this.dude.setY(Math.round(pointer.worldY / 50) * 50);
+						this.turnmanager = "playerattack";
+					}
+				}
+
+				//   this.physics.moveTo(this.dude,,,99);
+
+	    	}
+		});
+        this.dude.setCollideWorldBounds(true);
+		//this.dude = this.add.sprite(400, 200, 'sprites', 'dude');
+		//enemies
+		this.enemy = this.physics.add.image(500, 300, 'sprites', 'dude');
+		this.enemy.hp = 100;
+		this.enemy2 = this.physics.add.image(500, 350, 'sprites', 'dude');
+		this.enemy2.hp = 100;
+		this.enemy3 = this.physics.add.image(300, 150, 'sprites', 'dude');
+		this.enemy3.hp = 100;
+		this.enemy4 = this.physics.add.image(700, 550, 'sprites', 'dude');
+		this.enemy4.hp = 100;
+		this.enemies = [this.enemy, this.enemy2, this.enemy3, this.enemy4];
+
+		//fight buttons
+		this.doMelee = () => {
+			if (this.turnmanager == "playerattack"){
+				this.enemies.forEach(enemy => {
+					if(this.dude.body.position.x > enemy.body.position.x -91
+						&& this.dude.body.position.x < enemy.body.position.x +91)
+						{
+							if(this.dude.body.position.y > enemy.body.position.y -91
+							&& this.dude.body.position.y < enemy.body.position.y +91)
+							{
+								enemy.hp -= 50;
+								enemy.setScale(.5);
+								if(enemy.hp < 1){
+									this.enemies.splice(this.enemies.indexOf(enemy), 1);
+									enemy.destroy();
+								}
+							}
+						}
+				});
+				this.turnmanager = "enemymove";
+				this.time.delayedCall(1, moveEnemies());
+		    }
+		}
+		this.btnMelee = this.addButton(550, 550, 'sprites', this.doMelee, this, 'btn_play_hl', 'btn_play', 'btn_play_hl', 'btn_play');
+
+		
+		//enemy movement
+		moveEnemies = () => {
+			setTimeout(() => {
+			
+
+			if (this.turnmanager == "enemymove"){
+			// this.enemies.forEach(enemy => {
+				
+			// 	console.log(enemy.body.position.x, enemy.body.position.y);
+
+				// if(Math.random() < .25){
+				// 	enemy.setX(enemy.body.position.x += 50);
+				// }
+				// else if (Math.random() < .5){
+				// 	enemy.setX(enemy.body.position.x -= 50);
+				// }
+				// else if (Math.random() < .75){
+				// 	enemy.setY(enemy.body.position.y += 50);
+				// }
+				// else{
+				// 	enemy.setY(enemy.body.position.y -= 50);
+				// }
+
+				for (let i = 0; i < this.enemies.length; i++) {
+					let enemy = this.enemies[i];
+					this.direction = 'up';
+					if (Math.random() > .25){this.direction = 'down';}
+					if (Math.random() > .50){this.direction = 'left';}
+					if (Math.random() > .75){this.direction = 'right';}
+					
+					// Move the enemy in the specified direction by 50 pixels
+					switch(this.direction) {
+					  case 'up':
+						enemy.y > 50 ? enemy.y -= 50: "";
+						break;
+					  case 'down':
+						enemy.y < 600 ? enemy.y += 50: "";
+						break;
+					  case 'left':
+						enemy.x > 50 ? enemy.x -= 50: "";
+						break;
+					  case 'right':
+						enemy.x < 750 ? enemy.x += 50: "";
+						break;
+					}
+				  }
+
+				this.turnmanager = "enemyattack";
+				enemiesMelee();
+			}
+		}, 2000);
+	    }
+
+		//enemy attack
+		enemiesMelee = () => {
+			setTimeout(() => {
+			if (this.turnmanager == "enemyattack"){
+				for (let i = 0; i < this.enemies.length; i++) {
+					let enemy = this.enemies[i];
+					
+					if(this.dude.body.position.x > enemy.body.position.x -91
+						&& this.dude.body.position.x < enemy.body.position.x +91)
+						{
+							if(this.dude.body.position.y > enemy.body.position.y -91
+							&& this.dude.body.position.y < enemy.body.position.y +91)
+							{
+								this.dude.hp -= 50;
+								console.log(this.dude.hp);
+								this.dude.setScale(.5);
+								if(this.dude.hp < 1){
+									console.log("game over");
+									this.dude.setScale(0);
+								}
+							}
+						}
+				  }
+				this.turnmanager = "playermovement";
+			}
+		}, 2000);
+	    }
+
+
+		//player logic
+		// this.dude.setInteractive(true);
+		// this.dude.on('pointerdown', function (ptr)       { 
+		// 	//ptr.preventDefault();
+		// 	this.tweens.add({
+		// 		targets: this.dude,
+		// 		x: destinationX,
+		// 		y: destinationY,
+		// 		duration: 500, // Time in milliseconds for the animation to complete
+		// 		ease: 'Linear'
+		// 	  });} );
+
+		
+
 			
 		// add random coins and bombs
-		this.gameitems = this.physics.add.group();
+		// this.gameitems = this.physics.add.group();
 
-        for (var i = 0; i < 20; i++) {
-			// parameters
-            var x = Phaser.Math.RND.between(0, 800);
-            var y = Phaser.Math.RND.between(0, 600);
-			var objtype = (i < 5 ? TYPE_BOMB : TYPE_COIN);
+        // for (var i = 0; i < 20; i++) {
+		// 	// parameters
+        //     var x = Phaser.Math.RND.between(0, 800);
+        //     var y = Phaser.Math.RND.between(0, 600);
+		// 	var objtype = (i < 0 ? TYPE_BOMB : TYPE_COIN);
 
-			// create custom sprite object
-			var newobj = new CollectObj(this, x, y, 'sprites', objtype);
+		// 	// create custom sprite object
+		// 	var newobj = new CollectObj(this, x, y, 'sprites', objtype);
 
-			this.gameitems.add(newobj);
-        }
+		// 	this.gameitems.add(newobj);
+        // }
 
 		// coin particles
 		var sparks = this.add.particles('sprites');
