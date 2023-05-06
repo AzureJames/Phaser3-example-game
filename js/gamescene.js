@@ -34,7 +34,7 @@ var GameScene = new Phaser.Class({
 
 		this.dude = this.physics.add.sprite(500, 200, 'girl');
 		this.dude.setScale(.7);
-		this.dude.hp = 30;
+		this.dude.hp = 300;
 		//this.load.image('water', './assets/underwater.jpg');
 		
 		//player move
